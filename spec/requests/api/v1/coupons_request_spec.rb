@@ -8,7 +8,7 @@ describe "Coupon endpoints" do
 
     @coupon1 = Coupon.create(name: "10Off", dollars_off: 10, active: true, merchant_id: @merchant1.id)
     @coupon2 = Coupon.create(name: "BOBO50", percent_off: 0.50, active: false, merchant_id: @merchant1.id)
-    @coupon3 = Coupon.create(name: "BOGO100", percent_off: 1.0, active: true, merchant_id: @merchant1.id)
+    @coupon3 = Coupon.create(name: "BOGO100", percent_off: 1.0, active: true, merchant_id: @merchant2.id)
   end
 
   after(:all) do
@@ -24,7 +24,7 @@ describe "Coupon endpoints" do
 
     expect(json_response[:data][0][:attributes][:name]).to eq(@coupon1.name)
     expect(json_response[:data][0][:attributes][:dollars_off]).to eq(@coupon1.dollars_off)
-    expect(json_response[:data][0][:attributes][:active]).to eq(true)
+    expect(json_response[:data][1][:attributes][:active]).to eq(@coupon2.active)
   end
 
   it 'can show a coupon' do

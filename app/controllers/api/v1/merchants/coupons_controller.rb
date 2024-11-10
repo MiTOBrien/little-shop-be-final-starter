@@ -1,7 +1,7 @@
 class Api::V1::Merchants::CouponsController < ApplicationController
 
   def index
-    coupons = Coupon.all
+    coupons = Coupon.all_by_merchant(params[:merchant_id].to_i)
     render json: CouponSerializer.new(coupons)
   end
 
@@ -12,7 +12,7 @@ class Api::V1::Merchants::CouponsController < ApplicationController
   end
 
   def create
-    coupon = Coupon.checkNumber(coupon_params)
+    coupon = Coupon.check_number(coupon_params)
     render json: CouponSerializer.new(coupon)
   end
 

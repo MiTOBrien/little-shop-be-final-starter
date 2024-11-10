@@ -8,7 +8,9 @@ RSpec.describe "Merchant invoices endpoints" do
     @customer1 = Customer.create!(first_name: "Papa", last_name: "Gino")
     @customer2 = Customer.create!(first_name: "Jimmy", last_name: "John")
 
-    @invoice1 = Invoice.create!(customer: @customer1, merchant: @merchant1, status: "packaged")
+    @coupon1 = Coupon.create(name: "10Off", dollars_off: 10, active: true, merchant_id: @merchant1.id)
+
+    @invoice1 = Invoice.create!(customer: @customer1, merchant: @merchant1, status: "packaged", coupon_id: @coupon1.id)
     Invoice.create!(customer: @customer1, merchant: @merchant1, status: "shipped")
     Invoice.create!(customer: @customer1, merchant: @merchant1, status: "shipped")
     Invoice.create!(customer: @customer1, merchant: @merchant1, status: "shipped")
@@ -57,5 +59,17 @@ RSpec.describe "Merchant invoices endpoints" do
     expect(json[:message]).to eq("Your query could not be completed")
     expect(json[:errors]).to be_a Array
     expect(json[:errors].first).to eq("Couldn't find Merchant with 'id'=100000")
+  end
+
+  it 'should get invoices for a merchant and coupon id if applied' do
+    get "/api/v1/merchants/#{@merchant1.id}/invoices"
+    expect(response).to be_successful
+
+    json_response = JSON.parse(response.body, symbolize_names: true)
+
+    expect(json_response[:data].count).to eq(4)
+    expect(json_response[:data][0][:attributes][:merchant_id]).to eq(@merchant1.id)
+    expect(json_response[:data][0][:attributes][:coupon_id]).to eq(@invoice1.coupon_id)
+    expect(json_response[:data][1][:attributes][:coupon_id]).to eq(nil)
   end
 end

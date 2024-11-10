@@ -7,7 +7,11 @@ class Coupon < ApplicationRecord
   validates :active, inclusion: [true, false]
   validates :active, exclusion: [nil]
 
-  def self.checkNumber(coupon_params)
+  def self.all_by_merchant(merchant_id)
+    Coupon.where(merchant_id: merchant_id)
+  end
+  
+  def self.check_number(coupon_params)
     merchant_id = coupon_params[:merchant_id]
     if Coupon.where(merchant_id: merchant_id, active:true).count < 5
       Coupon.create!(coupon_params)

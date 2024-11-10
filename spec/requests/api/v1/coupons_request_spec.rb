@@ -42,7 +42,6 @@ describe "Coupon endpoints" do
     coupon_params = {name: "5Off", dollars_off: 5, active: true, merchant_id: @merchant1.id}
     headers = {"CONTENT_TYPE" => "application/json"}
 
-    # post api_v1_coupons_path(params: JSON.generate(coupon: coupon_params))
     post "/api/v1/merchants/#{@merchant1.id}/coupons", params: {coupon: coupon_params}
     expect(response).to be_successful
 
@@ -52,16 +51,24 @@ describe "Coupon endpoints" do
     expect(json_response.dollars_off).to eq(5)
     expect(json_response.active).to eq(true)
 
-    coupon_params = {name: "15Off", dollars_off: 15, active: false, merchant_id: @merchant1.id}
+    # UPDATE COUPON FROM ACTIVE TO INACTIVE
+    coupon_params = {active: false}
 
-    # UPDATE COUPON
     patch "/api/v1/merchants/#{@merchant1.id}/coupons/#{json_response.id}", params: {coupon: coupon_params}
     expect(response).to be_successful
 
     json_response = Coupon.last
     
-    expect(json_response.name).to eq("15Off")
-    expect(json_response.dollars_off).to eq(15)
     expect(json_response.active).to eq(false)
+
+    # UPDATE COUPON FROM INACTIVE TO ACTIVE
+    coupon_params = {active: true}
+    
+    patch "/api/v1/merchants/#{@merchant1.id}/coupons/#{json_response.id}", params: {coupon: coupon_params}
+    expect(response).to be_successful
+
+    json_response = Coupon.last
+    
+    expect(json_response.active).to eq(true)
   end
 end

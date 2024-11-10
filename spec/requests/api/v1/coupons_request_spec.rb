@@ -6,12 +6,19 @@ describe "Coupon endpoints" do
     @merchant2 = Merchant.create(name: "Large Shop of Wonders")
     @merchant3 = Merchant.create(name: "Wizard's Chest")
 
+    @customer1 = Customer.create!(first_name: "Papa", last_name: "Gino")
+
     @coupon1 = Coupon.create(name: "10Off", dollars_off: 10, active: true, merchant_id: @merchant1.id)
     @coupon2 = Coupon.create(name: "BOBO50", percent_off: 0.50, active: false, merchant_id: @merchant1.id)
     @coupon3 = Coupon.create(name: "BOGO100", percent_off: 1.0, active: true, merchant_id: @merchant2.id)
+
+    @invoice1 = Invoice.create!(customer: @customer1, merchant: @merchant1, status: "packaged", coupon_id: @coupon3.id)
+    @invoice2 = Invoice.create!(customer: @customer1, merchant: @merchant2, status: "shipped", coupon_id: @coupon3.id)
+    @invoice3 = Invoice.create!(customer: @customer1, merchant: @merchant1, status: "shipped", coupon_id: @coupon3.id)
   end
 
   after(:all) do
+    Invoice.delete_all
     Coupon.delete_all
     Merchant.delete_all
   end

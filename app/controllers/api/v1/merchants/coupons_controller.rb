@@ -17,6 +17,7 @@ class Api::V1::Merchants::CouponsController < ApplicationController
   end
 
   def update
+    # coupon = Coupon.check_pending(params)
     coupon = Coupon.find(params[:id])
     coupon.update(coupon_params)
     render json: CouponSerializer.new(coupon)

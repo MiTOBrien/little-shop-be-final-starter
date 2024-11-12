@@ -4,7 +4,7 @@ class CouponSerializer
   set_type :coupon
   attributes :name, :dollars_off, :percent_off, :status, :merchant_id
 
-  attribute :couut do |coupon|
+  attribute :count do |coupon|
     Invoice.where.not(coupon_id: nil).count
   end
 end

@@ -5,6 +5,7 @@ class Coupon < ApplicationRecord
   validates :name, presence: true
   validates :name, uniqueness: true
   validates :status, presence: true
+  validates :status, acceptance: { accept: ["active", "inactive"] }
 
   def self.all_by_merchant(merchant_id)
     Coupon.where(merchant_id: merchant_id)

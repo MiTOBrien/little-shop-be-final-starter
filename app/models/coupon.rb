@@ -16,4 +16,8 @@ class Coupon < ApplicationRecord
       Coupon.create!(coupon_params)
     end
   end
+
+  def self.check_packaged(params)
+    !Invoice.joins(:coupon).where(status: 'packaged', coupon_id: params).exists?
+  end
 end

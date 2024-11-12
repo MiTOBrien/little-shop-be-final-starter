@@ -45,36 +45,62 @@ describe "Coupon endpoints" do
     expect(json_response[:data][:attributes][:status]).to eq(@coupon3.status)
   end
 
-  it 'can create and update a coupon' do
-    coupon_params = {name: "5Off", dollars_off: 5, status: "active", merchant_id: @merchant1.id}
+  describe 'creating and updating coupons' do
 
-    post "/api/v1/merchants/#{@merchant1.id}/coupons", params: {coupon: coupon_params}
-    expect(response).to be_successful
-
-    json_response = Coupon.last
-    
-    expect(json_response.name).to eq("5Off")
-    expect(json_response.dollars_off).to eq(5)
-    expect(json_response.status).to eq("active")
-
-    # UPDATE COUPON FROM ACTIVE TO INACTIVE
-    coupon_params = {status: "inactive"}
-
-    patch "/api/v1/merchants/#{@merchant1.id}/coupons/#{json_response.id}", params: {coupon: coupon_params}
-    expect(response).to be_successful
-
-    json_response = Coupon.last
-    
-    expect(json_response.status).to eq("inactive")
-
-    # UPDATE COUPON FROM INACTIVE TO ACTIVE
-    coupon_params = {status: "active"}
-    
-    patch "/api/v1/merchants/#{@merchant1.id}/coupons/#{json_response.id}", params: {coupon: coupon_params}
-    expect(response).to be_successful
-
-    json_response = Coupon.last
-    
-    expect(json_response.status).to eq("active")
+    it 'can create and update a coupon' do
+      coupon_params = {name: "5Off", dollars_off: 5, status: "active", merchant_id: @merchant1.id}
+  
+      post "/api/v1/merchants/#{@merchant1.id}/coupons", params: {coupon: coupon_params}
+      expect(response).to be_successful
+  
+      json_response = Coupon.last
+      
+      expect(json_response.name).to eq("5Off")
+      expect(json_response.dollars_off).to eq(5)
+      expect(json_response.status).to eq("active")
+  
+      # SAD PATH - TRYING TO CREATE A DUPLICATE COUPON NAME
+      post "/api/v1/merchants/#{@merchant1.id}/coupons", params: {coupon: coupon_params}
+      expect(response).to_not be_successful
+  
+      #SAD PATH - MORE THAN 5 ACTIVE COUPONS
+      coupon_params1 = {name: "5Off", dollars_off: 5, status: "active", merchant_id: @merchant1.id}
+  
+      post "/api/v1/merchants/#{@merchant1.id}/coupons", params: {coupon: coupon_params1}
+      expect(response).to_not be_successful
+  
+      # UPDATE COUPON FROM ACTIVE TO INACTIVE
+      coupon_params = {status: "inactive"}
+  
+      patch "/api/v1/merchants/#{@merchant1.id}/coupons/#{json_response.id}", params: {coupon: coupon_params}
+      expect(response).to be_successful
+  
+      json_response = Coupon.last
+      
+      expect(json_response.status).to eq("inactive")
+  
+      # UPDATE COUPON FROM INACTIVE TO ACTIVE
+      coupon_params = {status: "active"}
+      
+      json_response = Coupon.last
+      
+      patch "/api/v1/merchants/#{@merchant1.id}/coupons/#{json_response.id}", params: {coupon: coupon_params}
+      
+      expect(response).to be_successful
+  
+      json_response = Coupon.last
+      
+      expect(json_response.status).to eq("active")
+  
+      # SAD PATH - DEACTIVATE A COUPON IF ON A PACKAGED INVOICE
+      coupon = Coupon.create(name: "BOGO100", percent_off: 1.0, status: "active", merchant_id: @merchant2.id)
+      invoice = Invoice.create!(customer: @customer1, merchant: @merchant2, status: "packaged", coupon_id: coupon.id)
+      
+      coupon_params = {status: "inactive"}
+  
+      patch "/api/v1/merchants/#{@merchant2.id}/coupons/#{coupon.id}", params: {coupon: coupon_params}
+  
+      expect(response).to_not be_successful
+    end
   end
 end
